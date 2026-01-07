@@ -1,0 +1,55 @@
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+env:
+  TF_IN_AUTOMATION: true
+  MODERNISATION_PLATFORM_ACCOUNT_NUMBER: ${{ secrets.MODERNISATION_PLATFORM_ACCOUNT_NUMBER }}
+  PASSPHRASE: ${{ secrets.PASSPHRASE }}
+
+permissions: {}
+
+jobs:
+  fetch-secrets:
+    uses: ministryofjustice/modernisation-platform-github-actions/.github/workflows/aws-secrets-management.yml@0c879ebf9183dd7e47d3fe9c961afa3271843b8b # v3.6.0
+    permissions:
+      id-token: write
+      contents: read
+    secrets:
+      MODERNISATION_PLATFORM_ACCOUNT_NUMBER: ${{ secrets.MODERNISATION_PLATFORM_ACCOUNT_NUMBER }}
+      PASSPHRASE: ${{ secrets.PASSPHRASE }}
+
+  go-tests:
+    permissions:
+      contents: read
+      actions: write
+    name: Run Go Unit Tests
+    runs-on: ubuntu-latest
+    needs: fetch-secrets
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Decrypt Secrets
+        uses: ministryofjustice/modernisation-platform-github-actions/decrypt-secrets@0c879ebf9183dd7e47d3fe9c961afa3271843b8b # v3.6.0
+        with:
+          testing_ci_iam_user_access_key_id: ${{ needs.fetch-secrets.outputs.testing_ci_iam_user_access_key_id }}
+          testing_ci_iam_user_secret_access_key: ${{ needs.fetch-secrets.outputs.testing_ci_iam_user_secret_access_key }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+
+      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        with:
+          go-version: 1.24
+          cache-dependency-path: "**/go.sum"
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: ~1.3
+          terraform_wrapper: false
+      - name: Download Go Modules
+        working-directory: test
+        run: go mod download
+      - name: Run Go Tests
+        working-directory: test
+        run: |
+          chmod 700 ../scripts/redact-output.sh
+          go test -v | ../scripts/redact-output.sh
+          exit ${PIPESTATUS[0]}
