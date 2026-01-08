@@ -1,11 +1,7 @@
 
-data "aws_acm_certificate" "certificate" {
-  arn = var.certificate_arn
-}
-
 resource "aws_route53_record" "dns_validation_record_core_vpc" {
   for_each = var.is-production ? {} : tomap({
-    for dvo in data.aws_acm_certificate.certificate.domain_validation_options : dvo.resource_record_name => {
+    for dvo in var.domain_validation_options : dvo.resource_record_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
@@ -26,7 +22,7 @@ resource "aws_route53_record" "dns_validation_record_core_vpc" {
 
 resource "aws_route53_record" "dns_validation_record_core_network_services" {
   for_each = var.is-production ? tomap({
-    for dvo in data.aws_acm_certificate.certificate.domain_validation_options : dvo.resource_record_name => {
+    for dvo in var.domain_validation_options : dvo.resource_record_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
