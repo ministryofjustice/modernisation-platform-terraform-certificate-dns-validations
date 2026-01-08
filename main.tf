@@ -1,8 +1,11 @@
-
-resource "aws_route53_record" "dns_validation_record_core_vpc" {
-  for_each = var.is-production ? {} : {
+locals {
+  validation_records = {
     for dvo in var.domain_validation_options : dvo.resource_record_name => dvo
   }
+}
+
+resource "aws_route53_record" "dns_validation_record_core_vpc" {
+  for_each = var.is-production ? {} : local.validation_records
   
   provider = aws.core-vpc
   zone_id  = var.zone_id_core_vpc_public
@@ -17,9 +20,7 @@ resource "aws_route53_record" "dns_validation_record_core_vpc" {
 }
 
 resource "aws_route53_record" "dns_validation_record_core_network_services" {
-  for_each = var.is-production ? {
-    for dvo in var.domain_validation_options : dvo.resource_record_name => dvo
-  } : {}
+  for_each = var.is-production ? local.validation_records : {}
   
   provider = aws.core-network-services
   zone_id  = var.zone_id_core_network_services_public
