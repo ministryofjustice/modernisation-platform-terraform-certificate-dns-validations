@@ -1,18 +1,14 @@
 
 resource "aws_route53_record" "dns_validation_record_core_vpc" {
   for_each = var.is-production ? {} : {
-    for dvo in var.domain_validation_options : dvo.resource_record_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
+    for dvo in var.domain_validation_options : dvo.resource_record_name => dvo
   }
   
   provider = aws.core-vpc
   zone_id  = var.zone_id_core_vpc_public
-  name     = each.value.name
-  type     = each.value.type
-  records  = [each.value.record]
+  name     = each.value.resource_record_name
+  type     = each.value.resource_record_type
+  records  = [each.value.resource_record_value]
   ttl      = 300
   
   lifecycle {
@@ -22,18 +18,14 @@ resource "aws_route53_record" "dns_validation_record_core_vpc" {
 
 resource "aws_route53_record" "dns_validation_record_core_network_services" {
   for_each = var.is-production ? {
-    for dvo in var.domain_validation_options : dvo.resource_record_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
+    for dvo in var.domain_validation_options : dvo.resource_record_name => dvo
   } : {}
   
   provider = aws.core-network-services
   zone_id  = var.zone_id_core_network_services_public
-  name     = each.value.name
-  type     = each.value.type
-  records  = [each.value.record]
+  name     = each.value.resource_record_name
+  type     = each.value.resource_record_type
+  records  = [each.value.resource_record_value]
   ttl      = 300
   
   lifecycle {
