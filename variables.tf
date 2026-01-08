@@ -4,9 +4,14 @@ variable "certificate_arn" {
   description = "ARN of the ACM certificate from the certificate module"
 }
 
-variable "certificate_domain" {
-  type        = string
-  description = "Domain name of the certificate to look up for validation"
+variable "domain_validation_options" {
+  type = set(object({
+    domain_name           = string
+    resource_record_name  = string
+    resource_record_type  = string
+    resource_record_value = string
+  }))
+  description = "Domain validation options from the certificate module (requires certificate to be applied first)"
 }
 
 variable "is-production" {

@@ -1,11 +1,6 @@
-data "aws_acm_certificate" "certificate" {
-  domain   = var.certificate_domain
-  statuses = ["PENDING_VALIDATION", "ISSUED"]
-}
-
 locals {
   validation_records = {
-    for dvo in data.aws_acm_certificate.certificate.domain_validation_options : dvo.resource_record_name => dvo
+    for dvo in var.domain_validation_options : dvo.resource_record_name => dvo
   }
 }
 
