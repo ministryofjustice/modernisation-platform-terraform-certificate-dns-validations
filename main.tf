@@ -6,14 +6,14 @@ locals {
 
 resource "aws_route53_record" "dns_validation_record_core_vpc" {
   for_each = var.is-production ? {} : local.validation_records
-  
+
   provider = aws.core-vpc
   zone_id  = var.zone_id_core_vpc_public
   name     = each.value.resource_record_name
   type     = each.value.resource_record_type
   records  = [each.value.resource_record_value]
   ttl      = 300
-  
+
   lifecycle {
     create_before_destroy = true
   }
@@ -21,14 +21,14 @@ resource "aws_route53_record" "dns_validation_record_core_vpc" {
 
 resource "aws_route53_record" "dns_validation_record_core_network_services" {
   for_each = var.is-production ? local.validation_records : {}
-  
+
   provider = aws.core-network-services
   zone_id  = var.zone_id_core_network_services_public
   name     = each.value.resource_record_name
   type     = each.value.resource_record_type
   records  = [each.value.resource_record_value]
   ttl      = 300
-  
+
   lifecycle {
     create_before_destroy = true
   }
