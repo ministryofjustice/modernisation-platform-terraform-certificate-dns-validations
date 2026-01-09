@@ -14,6 +14,12 @@ variable "domain_validation_options" {
   description = "Domain validation options from the certificate module (requires certificate to be applied first)"
 }
 
+variable "enable_certificate_validation" {
+  type        = bool
+  description = "Whether to create the certificate validation resource (set to false for testing)"
+  default     = true
+}
+
 variable "is-production" {
   type        = bool
   description = "Whether the environment is production or not"

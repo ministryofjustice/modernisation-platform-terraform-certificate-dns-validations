@@ -32,6 +32,7 @@ module "module_test" {
 
   certificate_arn                          = aws_acm_certificate.test_certificate.arn
   domain_validation_options                = local.mock_domain_validation_options
+  enable_certificate_validation            = false
   is-production                            = local.is-production
   zone_id_core_vpc_public                  = data.aws_route53_zone.external.zone_id
   zone_id_core_network_services_public     = data.aws_route53_zone.network-services.zone_id
