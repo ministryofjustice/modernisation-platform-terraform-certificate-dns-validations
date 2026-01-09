@@ -17,7 +17,4 @@ func TestModule(t *testing.T) {
 
 	terraform.InitAndApply(t, terraformOptions)
 
-	// exampleName := terraform.Output(t, terraformOptions, "example_name")
-
-	// assert.Regexp(t, regexp.MustCompile(`^example-name*`), exampleName)
 }
